@@ -1,0 +1,5 @@
+Flask==3.0.3
+selenium==4.21.0
+bs4==0.0.1
+orjson==3.10.4
+ujson==5.10.0
