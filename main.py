@@ -1,18 +1,23 @@
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
-from flask import *
+from flask import Flask, request
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service
 import json
+from webdriver_manager.chrome import ChromeDriverManager
 
 app = Flask(__name__)
 
 def scrape_poems():
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    
     ROOT = "https://smart.poems.com.sg/smartpark/"
     website = ROOT
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    driver = webdriver.Chrome(options=chrome_options)
     driver.get(website)
 
     box = driver.find_element(By.CSS_SELECTOR, "div[class='cpark']").find_element(By.CSS_SELECTOR, "div[class='boxedcontent']")
@@ -26,10 +31,11 @@ def scrape_poems():
     }
 
 
-@app.route("/", methods=['GET'])
-async def get_data():
-    result = scrape_poems()
-    return json.dumps(result)
+@app.route("/", methods=['GET', 'POST'])
+def get_data():
+    if (request.method == 'GET'):
+        result = scrape_poems()
+        return result
 
 if __name__ == '__main__':
     app.run(port=7777)
